@@ -108,6 +108,8 @@ bool CppGenerator::Generate(const FileDescriptor* file,
       file_options.table_driven_parsing = true;
     } else if (options[i].first == "table_driven_serialization") {
       file_options.table_driven_serialization = true;
+    } else if (options[i].first == "annotate_accessor") {
+        file_options.annotate_accessor = true;
     } else {
       *error = "Unknown generator option: " + options[i].first;
       return false;

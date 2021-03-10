@@ -1073,6 +1073,13 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
     } else {
       format("  static bool ValidateValue(void*) { return true; }\n");
     }
+    if (options_.annotate_accessor) {
+        format("private:\n");
+        for (auto f : FieldRange(descriptor_)) {
+            format("static volatile bool $1$_DoNotStrip;\n", FieldName(f));
+        }
+        format("public:\n");
+    }
     if (HasDescriptorMethods(descriptor_->file(), options_)) {
       format(
           "  void MergeFrom(const ::$proto_ns$::Message& other) final;\n"
@@ -1125,7 +1132,13 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
       "  return *this;\n"
       "}\n"
       "\n");
-
+  if (options_.annotate_accessor) {
+      format("private:\n");
+      for (auto f : FieldRange(descriptor_)) {
+          format("static volatile bool $1$_DoNotStrip;\n", FieldName(f));
+      }
+      format("public:\n");
+  }
   if (options_.table_driven_serialization) {
     format(
         "private:\n"
@@ -1886,6 +1899,12 @@ void MessageGenerator::GenerateClassMethods(io::Printer* printer) {
         "void $classname$::MergeFrom(const $classname$& other) {\n"
         "  MergeFromInternal(other);\n"
         "}\n");
+    if (options_.annotate_accessor) {
+        for (auto f : FieldRange(descriptor_)) {
+            format("volatile bool $classname$::$1$_DoNotStrip;\n",
+                   FieldName(f));
+        }
+    }
     if (HasDescriptorMethods(descriptor_->file(), options_)) {
       format(
           "::$proto_ns$::Metadata $classname$::GetMetadata() const {\n"
@@ -2017,7 +2036,12 @@ void MessageGenerator::GenerateClassMethods(io::Printer* printer) {
 
   GenerateSwap(printer);
   format("\n");
-
+  if (options_.annotate_accessor) {
+      for (auto f : FieldRange(descriptor_)) {
+          format("volatile bool $classname$::$1$_DoNotStrip;\n",
+                 FieldName(f));
+      }
+  }
   if (options_.table_driven_serialization) {
     format(
         "const void* $classname$::InternalGetTable() const {\n"
@@ -4043,3 +4067,4 @@ void MessageGenerator::GenerateIsInitialized(io::Printer* printer) {
 }  // namespace compiler
 }  // namespace protobuf
 }  // namespace google
+
