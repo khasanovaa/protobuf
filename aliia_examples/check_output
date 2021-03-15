@@ -1,0 +1,21 @@
+[0;33mStripped fields:[0m
+test.Person.id
+test.Person.name
+[0;33mStat without stripping:[0m
+  File: test_out
+  Size: 83864     	Blocks: 168        IO Block: 4096   regular file
+Device: 805h/2053d	Inode: 10628070    Links: 1
+Access: (0775/-rwxrwxr-x)  Uid: ( 1000/   aliia)   Gid: ( 1000/   aliia)
+Access: 2021-03-15 15:19:07.649754888 +0300
+Modify: 2021-03-15 15:19:07.649754888 +0300
+Change: 2021-03-15 15:19:07.649754888 +0300
+ Birth: -
+[0;33mStat with stripping:[0m
+  File: test_out_stripped
+  Size: 81840     	Blocks: 160        IO Block: 4096   regular file
+Device: 805h/2053d	Inode: 10628067    Links: 1
+Access: (0775/-rwxrwxr-x)  Uid: ( 1000/   aliia)   Gid: ( 1000/   aliia)
+Access: 2021-03-15 15:19:06.133781652 +0300
+Modify: 2021-03-15 15:19:06.133781652 +0300
+Change: 2021-03-15 15:19:06.133781652 +0300
+ Birth: -

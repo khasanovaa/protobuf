@@ -440,7 +440,7 @@ class ColdChunkSkipper {
       const std::vector<int>& has_bit_indices, const double cold_threshold)
       : chunks_(chunks),
         has_bit_indices_(has_bit_indices),
-        access_info_map_(options.access_info_map),
+        access_info_map_(options.access_info_map.get()),
         cold_threshold_(cold_threshold) {
     SetCommonVars(options, &variables_);
   }
