@@ -11,8 +11,7 @@ run_strip() {
   c++ -std=c++11 -Wno-return-type $1 test.pb.cc -o test_out_stripped `pkg-config --cflags --libs protobuf`
 }
 
-filenames=( "test0_setters_only.cpp" )
-#"test1_not_reachable_from_main.cpp" "test2_big_test.cpp" )
+filenames=( "test0_setters_only.cpp" "test1_not_reachable_from_main.cpp" "test2_big_test.cpp" )
 expected_accessed_fields_numbers=( 2 2 7 )
 failed=false
 
@@ -33,7 +32,7 @@ for i in "${!filenames[@]}"; do
   fi
 done
 
-#rm accessed_fields.txt test_out_annotated test_out_stripped test.pb.h test.pb.cc
+rm accessed_fields.txt test_out_annotated test_out_stripped test.pb.h test.pb.cc
 
 if [[ $failed == false ]]; then
   echo "All tests passed!"

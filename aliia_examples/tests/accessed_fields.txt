@@ -1,2 +1,0 @@
-test.Person.enum_var
-test.Person.message_var
