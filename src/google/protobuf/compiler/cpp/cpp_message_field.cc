@@ -105,31 +105,17 @@ void MessageFieldGenerator::GeneratePrivateMembers(io::Printer* printer) const {
 void MessageFieldGenerator::GenerateAccessorDeclarations(
     io::Printer* printer) const {
   Formatter format(printer, variables_);
-  if (IsFieldStripped(descriptor_, options_)) {
-    format(
-        "$deprecated_attr$const $type$& ${1$$name$$}$() const { "
-        "__builtin_trap(); }\n"
-        "$deprecated_attr$$type$* ${1$$release_name$$}$() { "
-        "__builtin_trap(); }\n"
-        "$deprecated_attr$$type$* ${1$mutable_$name$$}$() { "
-        "__builtin_trap(); }\n"
-        "$deprecated_attr$void ${1$set_allocated_$name$$}$"
-        "($type$* $name$) { __builtin_trap(); }\n"
-        "$deprecated_attr$void "
-        "${1$unsafe_arena_set_allocated_$name$$}$(\n"
-        "    $type$* $name$) { __builtin_trap(); }\n"
-        "$deprecated_attr$$type$* ${1$unsafe_arena_release_$name$$}$() { "
-        "__builtin_trap(); }\n",
-        descriptor_);
-    return;
-  }
+
   format(
-      "$deprecated_attr$const $type$& ${1$$name$$}$() const;\n"
-      "$deprecated_attr$$type$* ${1$$release_name$$}$();\n"
-      "$deprecated_attr$$type$* ${1$mutable_$name$$}$();\n"
+      "$deprecated_attr$const $type$& ${1$$name$$}$() const$2$\n"
+      "$deprecated_attr$$type$* ${1$$release_name$$}$()$2$\n"
+      "$deprecated_attr$$type$* ${1$mutable_$name$$}$()$2$\n"
       "$deprecated_attr$void ${1$set_allocated_$name$$}$"
-      "($type$* $name$);\n",
-      descriptor_);
+      "($type$* $name$)$3$\n",
+      descriptor_,
+      !IsFieldStripped(descriptor_, options_) ? ";" : " {__builtin_trap();}",
+      !IsFieldStripped(descriptor_, options_) ? ";" : " {}"
+      );
   if (!IsFieldStripped(descriptor_, options_)) {
     format(
         "private:\n"
@@ -169,7 +155,6 @@ void MessageFieldGenerator::GenerateInlineAccessorDefinitions(
   format(
       "inline void $classname$::unsafe_arena_set_allocated_$name$(\n"
       "    $type$* $name$) {\n"
-      "$annotate_accessor$"
       // If we're not on an arena, free whatever we were holding before.
       // (If we are on arena, we can just forget the earlier pointer.)
       "  if (GetArena() == nullptr) {\n"
@@ -237,7 +222,6 @@ void MessageFieldGenerator::GenerateInlineAccessorDefinitions(
   // the slow fallback function.
   format(
       "inline void $classname$::set_allocated_$name$($type$* $name$) {\n"
-      "$annotate_accessor$"
       "  ::$proto_ns$::Arena* message_arena = GetArena();\n");
   format("  if (message_arena == nullptr) {\n");
   if (IsCrossFileMessage(descriptor_)) {
@@ -488,7 +472,6 @@ void MessageOneofFieldGenerator::GenerateNonInlineAccessorDefinitions(
   Formatter format(printer, variables_);
   format(
       "void $classname$::set_allocated_$name$($type$* $name$) {\n"
-      "$annotate_accessor$"
       "  ::$proto_ns$::Arena* message_arena = GetArena();\n"
       "  clear_$oneof_name$();\n"
       "  if ($name$) {\n");
@@ -562,7 +545,6 @@ void MessageOneofFieldGenerator::GenerateInlineAccessorDefinitions(
       "}\n"
       "inline void $classname$::unsafe_arena_set_allocated_$name$"
       "($type$* $name$) {\n"
-      "$annotate_accessor$"
       // We rely on the oneof clear method to free the earlier contents of
       // this oneof. We can directly use the pointer we're given to set the
       // new value.
@@ -648,26 +630,11 @@ void RepeatedMessageFieldGenerator::GeneratePrivateMembers(
 void RepeatedMessageFieldGenerator::GenerateAccessorDeclarations(
     io::Printer* printer) const {
   Formatter format(printer, variables_);
-  if (IsFieldStripped(descriptor_, options_)) {
-    format(
-        "$deprecated_attr$$type$* ${1$mutable_$name$$}$(int index) { "
-        "__builtin_trap(); }\n"
-        "$deprecated_attr$::$proto_ns$::RepeatedPtrField< $type$ >*\n"
-        "    ${1$mutable_$name$$}$() { __builtin_trap(); }\n"
-        "$deprecated_attr$const $type$& ${1$$name$$}$(int index) const { "
-        "__builtin_trap(); }\n"
-        "$deprecated_attr$$type$* ${1$add_$name$$}$() { "
-        "__builtin_trap(); }\n"
-        "$deprecated_attr$const ::$proto_ns$::RepeatedPtrField< $type$ >&\n"
-        "    ${1$$name$$}$() const { __builtin_trap(); }\n",
-        descriptor_);
-    return;
-  }
   format(
-      "$deprecated_attr$$type$* ${1$mutable_$name$$}$(int index);\n"
+      "$deprecated_attr$$type$* ${1$mutable_$name$$}$(int index)$2$\n"
       "$deprecated_attr$::$proto_ns$::RepeatedPtrField< $type$ >*\n"
-      "    ${1$mutable_$name$$}$();\n",
-      descriptor_);
+      "    ${1$mutable_$name$$}$()$2$\n",
+      descriptor_, !IsFieldStripped(descriptor_, options_) ? ";" : " {__builtin_trap();}");
   if (!IsFieldStripped(descriptor_, options_)) {
     format(
         "private:\n"
@@ -677,11 +644,14 @@ void RepeatedMessageFieldGenerator::GenerateAccessorDeclarations(
         descriptor_);
   }
   format(
-      "$deprecated_attr$const $type$& ${1$$name$$}$(int index) const;\n"
-      "$deprecated_attr$$type$* ${1$add_$name$$}$();\n"
+      "$deprecated_attr$const $type$& ${1$$name$$}$(int index) const$2$\n"
+      "$deprecated_attr$$type$* ${1$add_$name$$}$()$3$\n"
       "$deprecated_attr$const ::$proto_ns$::RepeatedPtrField< $type$ >&\n"
-      "    ${1$$name$$}$() const;\n",
-      descriptor_);
+      "    ${1$$name$$}$() const$2$\n",
+      descriptor_,
+      !IsFieldStripped(descriptor_, options_) ? ";" : " {__builtin_trap();}",
+      !IsFieldStripped(descriptor_, options_) ? ";" : " {}"
+      );
 }
 
 void RepeatedMessageFieldGenerator::GenerateInlineAccessorDefinitions(
@@ -731,7 +701,6 @@ void RepeatedMessageFieldGenerator::GenerateInlineAccessorDefinitions(
       "  return $name$_$weak$.Add();\n"
       "}\n"
       "inline $type$* $classname$::add_$name$() {\n"
-      "$annotate_accessor$"
       "  // @@protoc_insertion_point(field_add:$full_name$)\n"
       "  return _internal_add_$name$();\n"
       "}\n");

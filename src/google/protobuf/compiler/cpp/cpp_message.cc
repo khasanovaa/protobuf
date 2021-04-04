@@ -574,7 +574,7 @@ MessageGenerator::MessageGenerator(
   // purposes.
   for (auto field : FieldRange(descriptor_)) {
     if (IsFieldStripped(field, options_)) {
-      continue;
+        continue;
     }
 
     if (IsWeak(field, options_)) {
@@ -663,7 +663,7 @@ void MessageGenerator::GenerateFieldAccessorDeclarations(io::Printer* printer) {
   for (auto field : FieldRange(descriptor_)) {
     if (!field->real_containing_oneof() && !field->options().weak() &&
         !IsFieldStripped(field, options_)) {
-      continue;
+        continue;
     }
     ordered_fields.push_back(field);
   }
@@ -718,7 +718,7 @@ void MessageGenerator::GenerateFieldAccessorDeclarations(io::Printer* printer) {
       }
     }
     format("$deprecated_attr$void ${1$clear_$name$$}$()$2$\n", field,
-           !IsFieldStripped(field, options_) ? ";" : "{__builtin_trap();}");
+           !IsFieldStripped(field, options_) ? ";" : "{}");
 
     // Generate type-specific accessor declarations.
     field_generators_.get(field).GenerateAccessorDeclarations(printer);
@@ -889,8 +889,7 @@ void MessageGenerator::GenerateFieldClear(const FieldDescriptor* field,
     format("inline ");
   }
   format(
-      "void $classname$::clear_$name$() {\n"
-      "$annotate_accessor$");
+      "void $classname$::clear_$name$() {\n");
 
   format.Indent();
 
@@ -971,8 +970,9 @@ void MessageGenerator::GenerateFieldAccessorDefinitions(io::Printer* printer) {
     }
 
     // Generate type-specific accessors.
+
     if (!IsFieldStripped(field, options_)) {
-      field_generators_.get(field).GenerateInlineAccessorDefinitions(printer);
+        field_generators_.get(field).GenerateInlineAccessorDefinitions(printer);
     }
 
     format("\n");
@@ -1544,14 +1544,14 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
         camel_oneof_name);
     for (auto field : FieldRange(oneof)) {
       if (!IsFieldStripped(field, options_)) {
-        field_generators_.get(field).GeneratePrivateMembers(printer);
+          field_generators_.get(field).GeneratePrivateMembers(printer);
       }
     }
     format.Outdent();
     format("} $1$_;\n", oneof->name());
     for (auto field : FieldRange(oneof)) {
       if (!IsFieldStripped(field, options_)) {
-        field_generators_.get(field).GenerateStaticMembers(printer);
+          field_generators_.get(field).GenerateStaticMembers(printer);
       }
     }
   }
@@ -1952,7 +1952,7 @@ void MessageGenerator::GenerateClassMethods(io::Printer* printer) {
   for (auto field : FieldRange(descriptor_)) {
     field_generators_.get(field).GenerateInternalAccessorDeclarations(printer);
     if (IsFieldStripped(field, options_)) {
-      continue;
+        continue;
     }
     if (HasHasbit(field)) {
       int has_bit_index = HasBitIndex(field);
@@ -1978,14 +1978,14 @@ void MessageGenerator::GenerateClassMethods(io::Printer* printer) {
   format("};\n\n");
   for (auto field : FieldRange(descriptor_)) {
     if (!IsFieldStripped(field, options_)) {
-      field_generators_.get(field).GenerateInternalAccessorDefinitions(printer);
+        field_generators_.get(field).GenerateInternalAccessorDefinitions(printer);
     }
   }
 
   // Generate non-inline field definitions.
   for (auto field : FieldRange(descriptor_)) {
     if (IsFieldStripped(field, options_)) {
-      continue;
+        continue;
     }
     field_generators_.get(field).GenerateNonInlineAccessorDefinitions(printer);
     if (IsCrossFileMaybeMap(field)) {
@@ -2286,7 +2286,7 @@ std::pair<size_t, size_t> MessageGenerator::GenerateOffsets(
   size_t entries = offsets;
   for (auto field : FieldRange(descriptor_)) {
     if (IsFieldStripped(field, options_)) {
-      format("~0u,  // stripped\n");
+        format("~0u,  // stripped\n");
       continue;
     }
     // TODO(sbenza): We should not have an entry in the offset table for fields
@@ -2300,7 +2300,7 @@ std::pair<size_t, size_t> MessageGenerator::GenerateOffsets(
     }
 
     if (!IsFieldUsed(field, options_)) {
-      format(" | 0x80000000u, // unused\n");
+        format(" | 0x80000000u, // unused\n");
     } else {
       format(",\n");
     }
@@ -2408,7 +2408,7 @@ void MessageGenerator::GenerateArenaDestructorCode(io::Printer* printer) {
     for (auto field : FieldRange(oneof)) {
       if (!IsFieldStripped(field, options_) &&
           field_generators_.get(field).GenerateArenaDestructorCode(printer)) {
-        need_registration = true;
+          need_registration = true;
       }
     }
   }
@@ -2541,6 +2541,8 @@ void MessageGenerator::GenerateStructors(io::Printer* printer) {
 
   // Initialize member variables with arena constructor.
   for (auto field : optimized_order_) {
+      if (!IsFieldStripped(field, options_)) {
+      }
     GOOGLE_DCHECK(!IsFieldStripped(field, options_));
     bool has_arena_constructor = field->is_repeated();
     if (!field->real_containing_oneof() &&
@@ -2648,7 +2650,7 @@ void MessageGenerator::GenerateStructors(io::Printer* printer) {
         format("case k$1$: {\n", UnderscoresToCamelCase(field->name(), true));
         format.Indent();
         if (!IsFieldStripped(field, options_)) {
-          field_generators_.get(field).GenerateMergingCode(printer);
+            field_generators_.get(field).GenerateMergingCode(printer);
         }
         format("break;\n");
         format.Outdent();
@@ -2895,7 +2897,7 @@ void MessageGenerator::GenerateOneofClear(io::Printer* printer) {
       format.Indent();
       // We clear only allocated objects in oneofs
       if (!IsStringOrMessage(field) || IsFieldStripped(field, options_)) {
-        format("// No need to clear\n");
+          format("// No need to clear\n");
       } else {
         field_generators_.get(field).GenerateClearingCode(printer);
       }
@@ -3184,7 +3186,7 @@ void MessageGenerator::GenerateClassSpecificMergeFrom(io::Printer* printer) {
       format("case k$1$: {\n", UnderscoresToCamelCase(field->name(), true));
       format.Indent();
       if (!IsFieldStripped(field, options_)) {
-        field_generators_.get(field).GenerateMergingCode(printer);
+          field_generators_.get(field).GenerateMergingCode(printer);
       }
       format("break;\n");
       format.Outdent();
@@ -3538,7 +3540,7 @@ void MessageGenerator::GenerateSerializeWithCachedSizesBody(
            ordered_fields[i]->number() < sorted_extensions[j]->start)) {
         const FieldDescriptor* field = ordered_fields[i++];
         if (IsFieldStripped(field, options_)) {
-          continue;
+            continue;
         }
         if (field->options().weak()) {
           if (last_weak_field == nullptr ||
@@ -3596,7 +3598,7 @@ void MessageGenerator::GenerateSerializeWithCachedSizesBodyShuffled(
   ordered_fields.erase(
       std::remove_if(ordered_fields.begin(), ordered_fields.end(),
                      [this](const FieldDescriptor* f) {
-                       return !IsFieldUsed(f, options_);
+                         return !IsFieldUsed(f, options_);
                      }),
       ordered_fields.end());
 
@@ -3901,7 +3903,7 @@ void MessageGenerator::GenerateByteSize(io::Printer* printer) {
       format("case k$1$: {\n", UnderscoresToCamelCase(field->name(), true));
       format.Indent();
       if (!IsFieldStripped(field, options_)) {
-        field_generators_.get(field).GenerateByteSize(printer);
+          field_generators_.get(field).GenerateByteSize(printer);
       }
       format("break;\n");
       format.Outdent();
@@ -4032,7 +4034,7 @@ void MessageGenerator::GenerateIsInitialized(io::Printer* printer) {
           field->cpp_type() == FieldDescriptor::CPPTYPE_MESSAGE &&
           !ShouldIgnoreRequiredFieldCheck(field, options_) &&
           scc_analyzer_->HasRequiredFields(field->message_type())) {
-        GOOGLE_CHECK(!(field->options().weak() || !field->real_containing_oneof()));
+          GOOGLE_CHECK(!(field->options().weak() || !field->real_containing_oneof()));
         if (field->options().weak()) {
           // Just skip.
         } else {
