@@ -1,5 +1,5 @@
 // This test (and all test{n}_getters_part{m}.cpp) checks that getters mark fields as used.
-// Getters are splitted to several file to make sure that each of them annotates the corresponding field as accessed.
+// Getters are split to several file to make sure that each of them annotates the corresponding field as accessed.
 #include "test.pb.h"
 
 void call_getters_part1(test::Person& p) {
