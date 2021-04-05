@@ -1,3 +1,4 @@
+// This test calls all setters to make sure they do not contain __builtin_trap()
 #include "test.pb.h"
 
 void call_setters() {

@@ -44,7 +44,7 @@ namespace protobuf {
 namespace compiler {
 class AccessInfoMap {
 public:
-    AccessInfoMap(std::string& filename) {
+    AccessInfoMap(const std::string& filename) {
         std::ifstream istrm(filename);
         std::string s;
         while (istrm >> s) {

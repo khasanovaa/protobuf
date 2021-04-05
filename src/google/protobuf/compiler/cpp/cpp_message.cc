@@ -2541,8 +2541,6 @@ void MessageGenerator::GenerateStructors(io::Printer* printer) {
 
   // Initialize member variables with arena constructor.
   for (auto field : optimized_order_) {
-      if (!IsFieldStripped(field, options_)) {
-      }
     GOOGLE_DCHECK(!IsFieldStripped(field, options_));
     bool has_arena_constructor = field->is_repeated();
     if (!field->real_containing_oneof() &&

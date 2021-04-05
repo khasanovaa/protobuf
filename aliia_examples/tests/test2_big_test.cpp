@@ -1,3 +1,4 @@
+// Calls all setters and getters methods.
 #include "test.pb.h"
 
 void call_setters(test::Person p) {

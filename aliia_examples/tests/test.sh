@@ -11,8 +11,8 @@ run_strip() {
   c++ -std=c++11 -Wno-return-type $1 test.pb.cc -o test_out_stripped `pkg-config --cflags --libs protobuf`
 }
 
-filenames=( "test0_setters_only.cpp" "test1_not_reachable_from_main.cpp" "test2_big_test.cpp" )
-expected_accessed_fields_numbers=( 2 2 7 )
+filenames=( $( ls test*.cpp ) )
+expected_accessed_fields_numbers=( 2 2 7 7 7 5 4 3 )
 failed=false
 
 for i in "${!filenames[@]}"; do

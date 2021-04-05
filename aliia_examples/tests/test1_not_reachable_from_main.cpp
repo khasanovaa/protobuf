@@ -1,3 +1,4 @@
+// This test contains all fields methods, but they are not called from main. Checks that non of these methods was deleted.
 #include "test.pb.h"
 
 void call_setters(test::Person p) {
