@@ -1,4 +1,5 @@
-// This test calls all setters to make sure they do not contain __builtin_trap()
+// This test calls all setters to make sure that none of them marks field as used and none of them contains
+// __builtin_trap() after stripping.
 #include "test.pb.h"
 
 void call_setters() {

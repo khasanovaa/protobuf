@@ -1,4 +1,5 @@
-// This test contains all fields methods, but they are not called from main. Checks that non of these methods was deleted.
+// This test contains all fields methods, but they are not reachable from main. Checks that non of these methods was
+// deleted to avoid compilation errors.
 #include "test.pb.h"
 
 void call_setters(test::Person p) {

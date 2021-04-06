@@ -1,4 +1,4 @@
-// Calls all setters and getters methods.
+// Calls all setters and getters methods. All fields should be marked as accessed.
 #include "test.pb.h"
 
 void call_setters(test::Person p) {

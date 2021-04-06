@@ -1,4 +1,4 @@
-// See the *_getters_part1.cpp for the description
+// See *_getters_part1.cpp file for the description.
 #include "test.pb.h"
 
 void call_getters_part3(test::Person& p) {
