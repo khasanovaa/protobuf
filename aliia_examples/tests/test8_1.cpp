@@ -1,4 +1,4 @@
-// This test checks that all accessed fileds are annotated with two modules for compilation.
+// This test checks that all accessed fields are annotated with two modules for compilation.
 #include "test.pb.h"
 #include "iostream"
 
