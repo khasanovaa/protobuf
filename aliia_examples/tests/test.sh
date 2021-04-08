@@ -2,20 +2,22 @@
 
 run_annotate_accessor() {
   protoc --cpp_out=annotate_accessor=true:. test.proto
-  c++ -std=c++11 $1 test.pb.cc -o test_out_annotated `pkg-config --cflags --libs protobuf` -fdata-sections -ffunction-sections -g -Wl,--gc-sections
+  c++ -std=c++11 "$@" test.pb.cc -o test_out_annotated `pkg-config --cflags --libs protobuf` -fdata-sections -ffunction-sections -g -Wl,--gc-sections
   objdump -t test_out_annotated | c++filt | grep -oP '\S+(?=_DoNotStrip)' |  sed -e 's/::/./g' > accessed_fields.txt
 }
 
 run_strip() {
   protoc --cpp_out=unused_field_stripping=true,access_info_map="accessed_fields.txt":. test.proto
-  c++ -std=c++11 -Wno-return-type $1 test.pb.cc -o test_out_stripped `pkg-config --cflags --libs protobuf`
+  c++ -std=c++11 -Wno-return-type "$@" test.pb.cc -o test_out_stripped `pkg-config --cflags --libs protobuf`
 }
 
-filenames=( $( ls test*.cpp ) )
-expected_accessed_fields_numbers=( 2 2 7 7 7 5 4 3 )
+filenames=( $( ls test[0-7]*.cpp ) )
+filenames[${#filenames[@]}]="test8_1.cpp test8_2.cpp"
+
+expected_accessed_fields_numbers=( 2 2 7 7 7 5 4 3 4 )
 failed=false
 
-for i in "${!filenames[@]}"; do
+for ((i = 0; i < ${#filenames[@]}; i++)); do
   filename=${filenames[i]}
   expected_accessed_filed_number=${expected_accessed_fields_numbers[i]}
 
