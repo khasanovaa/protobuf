@@ -3460,8 +3460,7 @@ void MessageGenerator::GenerateSerializeWithCachedSizesBody(
 
         if (!field->options().weak() && !field->is_repeated() && !eager_) {
           // We speculatively load the entire _has_bits_[index] contents, even
-          // if it i
-          // s for only one field.  Deferring non-oneof emitting would
+          // if it is for only one field.  Deferring non-oneof emitting would
           // allow us to determine whether this is going to be useful.
           int has_bit_index = mg_->has_bit_indices_[field->index()];
           if (cached_has_bit_index_ != has_bit_index / 32) {
