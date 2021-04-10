@@ -216,13 +216,13 @@ bool EmitFieldNonDefaultCondition(io::Printer* printer,
       format("if ($prefix$$name$().size() > 0) {\n");
     } else if (field->cpp_type() == FieldDescriptor::CPPTYPE_MESSAGE) {
       // Message fields still have has_$name$() methods.
-      format("if ($prefix$has_$name$()) {\n");
+      format("if ($prefix$_internal_has_$name$()) {\n");
     } else if (field->cpp_type() == FieldDescriptor::CPPTYPE_DOUBLE ||
                field->cpp_type() == FieldDescriptor::CPPTYPE_FLOAT) {
       // Handle float comparison to prevent -Wfloat-equal warnings
       format("if (!($prefix$$name$() <= 0 && $prefix$$name$() >= 0)) {\n");
     } else {
-      format("if ($prefix$$name$() != 0) {\n");
+      format("if ($prefix$_internal_$name$() != 0) {\n");
     }
     format.Indent();
     return true;
@@ -3460,7 +3460,8 @@ void MessageGenerator::GenerateSerializeWithCachedSizesBody(
 
         if (!field->options().weak() && !field->is_repeated() && !eager_) {
           // We speculatively load the entire _has_bits_[index] contents, even
-          // if it is for only one field.  Deferring non-oneof emitting would
+          // if it i
+          // s for only one field.  Deferring non-oneof emitting would
           // allow us to determine whether this is going to be useful.
           int has_bit_index = mg_->has_bit_indices_[field->index()];
           if (cached_has_bit_index_ != has_bit_index / 32) {

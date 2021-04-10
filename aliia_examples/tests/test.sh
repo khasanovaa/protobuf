@@ -14,7 +14,7 @@ run_strip() {
 filenames=( $( ls test[0-7]*.cpp ) )
 filenames[${#filenames[@]}]="test8_1.cpp test8_2.cpp"
 
-expected_accessed_fields_numbers=( 2 2 7 7 7 5 4 3 4 )
+expected_accessed_fields_numbers=( 0 0 7 6 7 4 2 2 2 )
 failed=false
 
 for ((i = 0; i < ${#filenames[@]}; i++)); do
@@ -23,13 +23,13 @@ for ((i = 0; i < ${#filenames[@]}; i++)); do
 
   run_annotate_accessor $filename
   if [[ $(wc -l < accessed_fields.txt) != $expected_accessed_filed_number ]]; then
-    echo "Test($i) failed: incorrect accessed fields number" # enum and message are always accessed.
+    echo "Test($i) failed: incorrect accessed fields number"
     failed=true
   fi
 
   run_strip $filename
   if [[ $? != 0 ]]; then
-    echo "Test($i) failed: stripped finished abnormal." # enum and message are always accessed.
+    echo "Test($i) failed: stripped finished abnormal."
     failed=true
   fi
 done

@@ -178,6 +178,7 @@ void MessageFieldGenerator::GenerateInlineAccessorDefinitions(
       "}\n");
   format(
       "inline $type$* $classname$::$release_name$() {\n"
+      "$annotate_accessor$"
       "$type_reference_function$"
       "  $clear_hasbit$\n"
       "  $type$* temp = $casted_member$;\n"
