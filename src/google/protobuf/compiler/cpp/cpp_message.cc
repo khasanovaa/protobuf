@@ -1360,7 +1360,8 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
   }
 
   format(
-      "int GetCachedSize() const final { return _cached_size_.Get(); }"
+      "int GetCachedSize() const final { return _cached_size_.Get(); }\n"
+      "void AccessAllFields();"
       "\n\nprivate:\n"
       "inline void SharedCtor();\n"
       "inline void SharedDtor();\n"
@@ -1562,7 +1563,6 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
     format(cached_size_decl.c_str());
     need_to_emit_cached_size = false;
   }
-
   // Generate _oneof_case_.
   if (descriptor_->real_oneof_decl_count() > 0) {
     format(
@@ -1589,8 +1589,8 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
 }  // NOLINT(readability/fn_size)
 
 void MessageGenerator::GenerateInlineMethods(io::Printer* printer) {
-  if (IsMapEntryMessage(descriptor_)) return;
-  GenerateFieldAccessorDefinitions(printer);
+    if (IsMapEntryMessage(descriptor_)) return;
+    GenerateFieldAccessorDefinitions(printer);
 
   // Generate oneof_case() functions.
   for (auto oneof : OneOfRange(descriptor_)) {
@@ -1600,11 +1600,16 @@ void MessageGenerator::GenerateInlineMethods(io::Printer* printer) {
     format.Set("oneof_index", oneof->index());
     format(
         "inline $classname$::$camel_oneof_name$Case $classname$::"
-        "${1$$oneof_name$_case$}$() const {\n"
+        "${1$$oneof_name$_case$}$() const {\n", oneof);
+    if (options_.annotate_accessor) {
+        for (int i = 0; i < oneof->field_count(); i++) {
+            format("$1$_DoNotStrip = true;\n", FieldName(oneof->field(i)));
+        }
+    }
+    format(
         "  return $classname$::$camel_oneof_name$Case("
         "_oneof_case_[$oneof_index$]);\n"
-        "}\n",
-        oneof);
+        "}\n");
   }
 }
 
@@ -2031,6 +2036,9 @@ void MessageGenerator::GenerateClassMethods(io::Printer* printer) {
     format("\n");
 
     GenerateIsInitialized(printer);
+    format("\n");
+
+    GenerateAccessAllFields(printer);
     format("\n");
   }
 
@@ -4063,6 +4071,18 @@ void MessageGenerator::GenerateIsInitialized(io::Printer* printer) {
       "}\n");
 }
 
+void MessageGenerator::GenerateAccessAllFields(io::Printer* printer) {
+    Formatter format(printer, variables_);
+    format("void $classname$::AccessAllFields() {\n");
+    if (options_.annotate_accessor) {
+        format.Indent();
+        for (auto f : FieldRange(descriptor_)) {
+            format("$1$_DoNotStrip = true;\n", FieldName(f));
+        }
+        format.Outdent();
+    }
+    format("}\n");
+}
 }  // namespace cpp
 }  // namespace compiler
 }  // namespace protobuf

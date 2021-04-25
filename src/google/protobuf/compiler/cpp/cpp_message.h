@@ -173,6 +173,7 @@ class MessageGenerator {
   void GenerateConstructorBody(io::Printer* printer,
                                std::vector<bool> already_processed,
                                bool copy_constructor) const;
+  void GenerateAccessAllFields(io::Printer* printer);
 
   size_t HasBitsSize() const;
   int HasBitIndex(const FieldDescriptor* a) const;
