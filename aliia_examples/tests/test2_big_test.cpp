@@ -28,7 +28,24 @@ void call_setters(test::Person p) {
 
     p.clear_oneof_int_var();
     p.set_oneof_int_var(1);
+
+    p.clear_oneof_string_var();
+    p.set_oneof_string_var(str);
+    p.set_oneof_string_var(std::move(str));
+    str = "priv";
+    p.set_oneof_string_var(str.c_str());
+    p.set_oneof_string_var(str.c_str(), 1);
+
+    p.set_allocated_oneof_string_var(&str);
+
+    p.clear_oneof_enum_var();
+    p.set_oneof_enum_var(::test::SimpleEnum_MAX);
+
+    p.clear_oneof_message_var();
+    p.set_allocated_oneof_message_var(nested);
+
     p.clear_oneof_var();
+
 }
 
 void call_getters(test::Person& p) {
@@ -59,6 +76,19 @@ void call_getters(test::Person& p) {
 
     p.has_oneof_int_var();
     p.oneof_int_var();
+    p.has_oneof_string_var();
+    p.oneof_string_var();
+    p.mutable_oneof_string_var();
+    p.release_oneof_string_var();
+    p.has_oneof_enum_var();
+    p.oneof_enum_var();
+    p.has_oneof_message_var();
+    p.oneof_message_var();
+    p.release_oneof_message_var();
+    p.mutable_oneof_message_var();
+
+    p.oneof_var_case();
+
 }
 
 int main() {
@@ -67,9 +97,3 @@ int main() {
     call_getters(p);
     return 0;
 }
-
-//void unsafe_arena_set_allocated_message_var(
-//        ::test::Person_Nested * message_var);
-//::test::Person_Nested * unsafe_arena_release_message_var();
-//
-//OneofVarCase oneof_var_case() const;

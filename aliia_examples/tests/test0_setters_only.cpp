@@ -28,9 +28,9 @@ void call_setters() {
     p.clear_enum_var();
     p.set_enum_var(::test::SimpleEnum::BAR_VALUE);
 
-    p.clear_oneof_int_var();
-    p.set_oneof_int_var(1);
-    p.clear_oneof_var();
+//    p.clear_oneof_int_var();
+//    p.set_oneof_int_var(1);
+//    p.clear_oneof_var();
 }
 
 

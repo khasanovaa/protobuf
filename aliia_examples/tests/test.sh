@@ -8,13 +8,13 @@ run_annotate_accessor() {
 
 run_strip() {
   protoc --cpp_out=unused_field_stripping=true,access_info_map="accessed_fields.txt":. test.proto
-  c++ -std=c++11 -Wno-return-type "$@" test.pb.cc -o test_out_stripped `pkg-config --cflags --libs protobuf`
+  c++ -std=c++11 "$@" test.pb.cc -o test_out_stripped `pkg-config --cflags --libs protobuf`
 }
 
-filenames=( $( ls test[0-7]*.cpp ) )
-filenames[${#filenames[@]}]="test8_1.cpp test8_2.cpp"
+filenames=( $( ls test[0-9]*.cpp ) )
+filenames[${#filenames[@]}]="test_last_1.cpp test_last_2.cpp"
 
-expected_accessed_fields_numbers=( 0 0 7 6 7 4 2 2 2 )
+expected_accessed_fields_numbers=( 0 0 10 6 7 4 2 2 4 10 2)
 failed=false
 
 for ((i = 0; i < ${#filenames[@]}; i++)); do
@@ -24,6 +24,7 @@ for ((i = 0; i < ${#filenames[@]}; i++)); do
   run_annotate_accessor $filename
   if [[ $(wc -l < accessed_fields.txt) != $expected_accessed_filed_number ]]; then
     echo "Test($i) failed: incorrect accessed fields number"
+    cat accessed_fields.txt
     failed=true
   fi
 

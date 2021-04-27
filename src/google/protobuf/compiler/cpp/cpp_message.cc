@@ -746,6 +746,9 @@ void MessageGenerator::GenerateFieldAccessorDeclarations(io::Printer* printer) {
     format.Set("camel_oneof_name", UnderscoresToCamelCase(oneof->name(), true));
     format(
         "void ${1$clear_$oneof_name$$}$();\n"
+        "private:\n"
+        "$camel_oneof_name$Case _internal_$oneof_name$_case() const;\n"
+        "public:\n"
         "$camel_oneof_name$Case $oneof_name$_case() const;\n",
         oneof);
   }
@@ -824,7 +827,7 @@ void MessageGenerator::GenerateOneofHasBits(io::Printer* printer) {
     format.Set("cap_oneof_name", ToUpper(oneof->name()));
     format(
         "inline bool $classname$::has_$oneof_name$() const {\n"
-        "  return $oneof_name$_case() != $cap_oneof_name$_NOT_SET;\n"
+        "  return _internal_$oneof_name$_case() != $cap_oneof_name$_NOT_SET;\n"
         "}\n"
         "inline void $classname$::clear_has_$oneof_name$() {\n"
         "  _oneof_case_[$oneof_index$] = $cap_oneof_name$_NOT_SET;\n"
@@ -857,7 +860,7 @@ void MessageGenerator::GenerateOneofMemberHasBits(const FieldDescriptor* field,
   if (HasHasMethod(field)) {
     format(
         "inline bool $classname$::_internal_has_$name$() const {\n"
-        "  return $oneof_name$_case() == k$field_name$;\n"
+        "  return _internal_$oneof_name$_case() == k$field_name$;\n"
         "}\n"
         "inline bool $classname$::has_$name$() const {\n"
         "$annotate_accessor$"
@@ -866,7 +869,7 @@ void MessageGenerator::GenerateOneofMemberHasBits(const FieldDescriptor* field,
   } else if (HasPrivateHasMethod(field)) {
     format(
         "inline bool $classname$::_internal_has_$name$() const {\n"
-        "  return $oneof_name$_case() == k$field_name$;\n"
+        "  return _internal_$oneof_name$_case() == k$field_name$;\n"
         "}\n");
   }
   // set_has_$name$() for oneof fields is always private; hence should not be
@@ -1589,8 +1592,8 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
 }  // NOLINT(readability/fn_size)
 
 void MessageGenerator::GenerateInlineMethods(io::Printer* printer) {
-    if (IsMapEntryMessage(descriptor_)) return;
-    GenerateFieldAccessorDefinitions(printer);
+  if (IsMapEntryMessage(descriptor_)) return;
+  GenerateFieldAccessorDefinitions(printer);
 
   // Generate oneof_case() functions.
   for (auto oneof : OneOfRange(descriptor_)) {
@@ -1598,6 +1601,16 @@ void MessageGenerator::GenerateInlineMethods(io::Printer* printer) {
     format.Set("camel_oneof_name", UnderscoresToCamelCase(oneof->name(), true));
     format.Set("oneof_name", oneof->name());
     format.Set("oneof_index", oneof->index());
+
+    format(
+            "inline $classname$::$camel_oneof_name$Case $classname$::"
+            "${1$_internal_$oneof_name$_case$}$() const {\n"
+            "  return $classname$::$camel_oneof_name$Case("
+            "_oneof_case_[$oneof_index$]);\n"
+            "}\n\n",
+            oneof);
+
+
     format(
         "inline $classname$::$camel_oneof_name$Case $classname$::"
         "${1$$oneof_name$_case$}$() const {\n", oneof);
@@ -1607,9 +1620,9 @@ void MessageGenerator::GenerateInlineMethods(io::Printer* printer) {
         }
     }
     format(
-        "  return $classname$::$camel_oneof_name$Case("
-        "_oneof_case_[$oneof_index$]);\n"
-        "}\n");
+        "  return ${1$_internal_$oneof_name$_case$}$();\n"
+        "}\n",
+        oneof);
   }
 }
 
@@ -2649,7 +2662,7 @@ void MessageGenerator::GenerateStructors(io::Printer* printer) {
     for (auto oneof : OneOfRange(descriptor_)) {
       format(
           "clear_has_$1$();\n"
-          "switch (from.$1$_case()) {\n",
+          "switch (from._internal_$1$_case()) {\n",
           oneof->name());
       format.Indent();
       for (auto field : FieldRange(oneof)) {
@@ -2896,7 +2909,7 @@ void MessageGenerator::GenerateOneofClear(io::Printer* printer) {
         "void $classname$::clear_$oneofname$() {\n"
         "// @@protoc_insertion_point(one_of_clear_start:$full_name$)\n");
     format.Indent();
-    format("switch ($oneofname$_case()) {\n");
+    format("switch (_internal_$oneofname$_case()) {\n");
     format.Indent();
     for (auto field : FieldRange(oneof)) {
       format("case k$1$: {\n", UnderscoresToCamelCase(field->name(), true));
@@ -3186,7 +3199,7 @@ void MessageGenerator::GenerateClassSpecificMergeFrom(io::Printer* printer) {
 
   // Merge oneof fields. Oneof field requires oneof case check.
   for (auto oneof : OneOfRange(descriptor_)) {
-    format("switch (from.$1$_case()) {\n", oneof->name());
+    format("switch (from._internal_$1$_case()) {\n", oneof->name());
     format.Indent();
     for (auto field : FieldRange(oneof)) {
       format("case k$1$: {\n", UnderscoresToCamelCase(field->name(), true));
@@ -3311,7 +3324,7 @@ void MessageGenerator::GenerateSerializeOneofFields(
   }
   // We have multiple mutually exclusive choices.  Emit a switch statement.
   const OneofDescriptor* oneof = fields[0]->containing_oneof();
-  format("switch ($1$_case()) {\n", oneof->name());
+  format("switch (_internal_$1$_case()) {\n", oneof->name());
   format.Indent();
   for (auto field : fields) {
     format("case k$1$: {\n", UnderscoresToCamelCase(field->name(), true));
@@ -3902,7 +3915,7 @@ void MessageGenerator::GenerateByteSize(io::Printer* printer) {
   // Fields inside a oneof don't use _has_bits_ so we count them in a separate
   // pass.
   for (auto oneof : OneOfRange(descriptor_)) {
-    format("switch ($1$_case()) {\n", oneof->name());
+    format("switch (_internal_$1$_case()) {\n", oneof->name());
     format.Indent();
     for (auto field : FieldRange(oneof)) {
       PrintFieldComment(format, field);
@@ -4030,7 +4043,7 @@ void MessageGenerator::GenerateIsInitialized(io::Printer* printer) {
       continue;
     }
 
-    format("switch ($1$_case()) {\n", oneof->name());
+    format("switch (_internal_$1$_case()) {\n", oneof->name());
     format.Indent();
     for (auto field : FieldRange(oneof)) {
       format("case k$1$: {\n", UnderscoresToCamelCase(field->name(), true));

@@ -23,6 +23,8 @@ message Person {
 
   oneof oneof_var {
     int32 oneof_int_var = 7;
+    string oneof_string_var = 8;
+    SimpleEnum oneof_enum_var = 10;
+    Nested oneof_message_var = 11;
   }
-
 }
