@@ -608,11 +608,11 @@ void RepeatedStringFieldGenerator::GenerateAccessorDeclarations(
   format(
       "$deprecated_attr$void ${1$set_$name$$}$("
       "int index, const $pointer_type$* value, size_t size)$2$\n"
-      "$deprecated_attr$std::string* ${1$add_$name$$}$()$2$\n"
+      "$deprecated_attr$std::string* ${1$add_$name$$}$()$3$\n"
       "$deprecated_attr$void ${1$add_$name$$}$(const std::string& value)$2$\n"
       "$deprecated_attr$void ${1$add_$name$$}$(std::string&& value)$2$\n"
       "$deprecated_attr$void ${1$add_$name$$}$(const char* value)$2$\n",
-      descriptor_, is_field_used_setter);
+      descriptor_, is_field_used_setter, is_field_used_getter);
   if (!options_.opensource_runtime) {
     format(
         "$deprecated_attr$void ${1$add_$name$$}$(StringPiece value)$2$\n",

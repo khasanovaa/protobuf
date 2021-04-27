@@ -646,12 +646,11 @@ void RepeatedMessageFieldGenerator::GenerateAccessorDeclarations(
   }
   format(
       "$deprecated_attr$const $type$& ${1$$name$$}$(int index) const$2$\n"
-      "$deprecated_attr$$type$* ${1$add_$name$$}$()$3$\n"
+      "$deprecated_attr$$type$* ${1$add_$name$$}$()$2$\n"
       "$deprecated_attr$const ::$proto_ns$::RepeatedPtrField< $type$ >&\n"
       "    ${1$$name$$}$() const$2$\n",
       descriptor_,
-      !IsFieldStripped(descriptor_, options_) ? ";" : " {__builtin_trap();}",
-      !IsFieldStripped(descriptor_, options_) ? ";" : " {}"
+      !IsFieldStripped(descriptor_, options_) ? ";" : " {__builtin_trap();}"
       );
 }
 
