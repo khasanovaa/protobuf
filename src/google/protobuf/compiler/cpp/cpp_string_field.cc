@@ -152,34 +152,36 @@ void StringFieldGenerator::GenerateAccessorDeclarations(
         "  // Hidden due to unknown ctype option.\n");
     format.Indent();
   }
-
+  std::string is_field_used_getter = !IsFieldStripped(descriptor_, options_) ? ";" : " {__builtin_trap();}";
+  std::string is_field_used_setter = !IsFieldStripped(descriptor_, options_) ? ";" : " {}";
   format(
-      "$deprecated_attr$const std::string& ${1$$name$$}$() const;\n"
-      "$deprecated_attr$void ${1$set_$name$$}$(const std::string& value);\n"
-      "$deprecated_attr$void ${1$set_$name$$}$(std::string&& value);\n"
-      "$deprecated_attr$void ${1$set_$name$$}$(const char* value);\n",
-      descriptor_);
+      "$deprecated_attr$const std::string& ${1$$name$$}$() const$2$\n"
+      "$deprecated_attr$void ${1$set_$name$$}$(const std::string& value)$3$\n"
+      "$deprecated_attr$void ${1$set_$name$$}$(std::string&& value)$3$\n"
+      "$deprecated_attr$void ${1$set_$name$$}$(const char* value)$3$\n",
+      descriptor_, is_field_used_getter, is_field_used_setter);
   if (!options_.opensource_runtime) {
     format(
-        "$deprecated_attr$void ${1$set_$name$$}$(::StringPiece value);\n",
-        descriptor_);
+        "$deprecated_attr$void ${1$set_$name$$}$(::StringPiece value)$2$\n",
+        descriptor_, is_field_used_setter);
   }
   format(
       "$deprecated_attr$void ${1$set_$name$$}$(const $pointer_type$* "
       "value, size_t size)"
-      ";\n"
-      "$deprecated_attr$std::string* ${1$mutable_$name$$}$();\n"
-      "$deprecated_attr$std::string* ${1$$release_name$$}$();\n"
+      "$2$\n"
+      "$deprecated_attr$std::string* ${1$mutable_$name$$}$()$3$\n"
+      "$deprecated_attr$std::string* ${1$$release_name$$}$()$3$\n"
       "$deprecated_attr$void ${1$set_allocated_$name$$}$(std::string* "
-      "$name$);\n",
-      descriptor_);
-  format(
-      "private:\n"
-      "const std::string& _internal_$name$() const;\n"
-      "void _internal_set_$name$(const std::string& value);\n"
-      "std::string* _internal_mutable_$name$();\n"
-      "public:\n");
-
+      "$name$)$2$\n",
+      descriptor_, is_field_used_setter, is_field_used_getter);
+  if (!IsFieldStripped(descriptor_, options_)) {
+      format(
+              "private:\n"
+              "const std::string& _internal_$name$() const;\n"
+              "void _internal_set_$name$(const std::string& value);\n"
+              "std::string* _internal_mutable_$name$();\n"
+              "public:\n");
+  }
   if (unknown_ctype) {
     format.Outdent();
     format(" public:\n");
@@ -203,7 +205,6 @@ void StringFieldGenerator::GenerateInlineAccessorDefinitions(
       "  return _internal_$name$();\n"
       "}\n"
       "inline void $classname$::set_$name$(const std::string& value) {\n"
-      "$annotate_accessor$"
       "  _internal_set_$name$(value);\n"
       "  // @@protoc_insertion_point(field_set:$full_name$)\n"
       "}\n"
@@ -221,14 +222,12 @@ void StringFieldGenerator::GenerateInlineAccessorDefinitions(
       "  $name$_.Set($default_value_tag$, value, GetArena());\n"
       "}\n"
       "inline void $classname$::set_$name$(std::string&& value) {\n"
-      "$annotate_accessor$"
       "  $set_hasbit$\n"
       "  $name$_.Set(\n"
       "    $default_value_tag$, ::std::move(value), GetArena());\n"
       "  // @@protoc_insertion_point(field_set_rvalue:$full_name$)\n"
       "}\n"
       "inline void $classname$::set_$name$(const char* value) {\n"
-      "$annotate_accessor$"
       "  $null_check$"
       "  $set_hasbit$\n"
       "  $name$_.Set($default_value_tag$, $string_piece$(value), GetArena());\n"
@@ -237,7 +236,6 @@ void StringFieldGenerator::GenerateInlineAccessorDefinitions(
   if (!options_.opensource_runtime) {
     format(
         "inline void $classname$::set_$name$(::StringPiece value) {\n"
-        "$annotate_accessor$"
         "  $set_hasbit$\n"
         "  $name$_.Set($default_value_tag$, value,GetArena());\n"
         "  // @@protoc_insertion_point(field_set_string_piece:$full_name$)\n"
@@ -247,7 +245,6 @@ void StringFieldGenerator::GenerateInlineAccessorDefinitions(
       "inline "
       "void $classname$::set_$name$(const $pointer_type$* value,\n"
       "    size_t size) {\n"
-      "$annotate_accessor$"
       "  $set_hasbit$\n"
       "  $name$_.Set($default_value_tag$, $string_piece$(\n"
       "      reinterpret_cast<const char*>(value), size), GetArena());\n"
@@ -275,7 +272,6 @@ void StringFieldGenerator::GenerateInlineAccessorDefinitions(
   format(
       "}\n"
       "inline void $classname$::set_allocated_$name$(std::string* $name$) {\n"
-      "$annotate_accessor$"
       "  if ($name$ != nullptr) {\n"
       "    $set_hasbit$\n"
       "  } else {\n"
@@ -432,7 +428,6 @@ void StringOneofFieldGenerator::GenerateInlineAccessorDefinitions(
       "  return _internal_$name$();\n"
       "}\n"
       "inline void $classname$::set_$name$(const std::string& value) {\n"
-      "$annotate_accessor$"
       "  _internal_set_$name$(value);\n"
       "  // @@protoc_insertion_point(field_set:$full_name$)\n"
       "}\n"
@@ -457,7 +452,6 @@ void StringOneofFieldGenerator::GenerateInlineAccessorDefinitions(
       "  $field_member$.Set($default_value_tag$, value, GetArena());\n"
       "}\n"
       "inline void $classname$::set_$name$(std::string&& value) {\n"
-      "$annotate_accessor$"
       "  // @@protoc_insertion_point(field_set:$full_name$)\n"
       "  if (!_internal_has_$name$()) {\n"
       "    clear_$oneof_name$();\n"
@@ -469,7 +463,6 @@ void StringOneofFieldGenerator::GenerateInlineAccessorDefinitions(
       "  // @@protoc_insertion_point(field_set_rvalue:$full_name$)\n"
       "}\n"
       "inline void $classname$::set_$name$(const char* value) {\n"
-      "$annotate_accessor$"
       "  $null_check$"
       "  if (!_internal_has_$name$()) {\n"
       "    clear_$oneof_name$();\n"
@@ -483,7 +476,6 @@ void StringOneofFieldGenerator::GenerateInlineAccessorDefinitions(
   if (!options_.opensource_runtime) {
     format(
         "inline void $classname$::set_$name$(::StringPiece value) {\n"
-        "$annotate_accessor$"
         "  if (!_internal_has_$name$()) {\n"
         "    clear_$oneof_name$();\n"
         "    set_has_$name$();\n"
@@ -497,7 +489,6 @@ void StringOneofFieldGenerator::GenerateInlineAccessorDefinitions(
       "inline "
       "void $classname$::set_$name$(const $pointer_type$* value,\n"
       "                             size_t size) {\n"
-      "$annotate_accessor$"
       "  if (!_internal_has_$name$()) {\n"
       "    clear_$oneof_name$();\n"
       "    set_has_$name$();\n"
@@ -529,7 +520,6 @@ void StringOneofFieldGenerator::GenerateInlineAccessorDefinitions(
       "  }\n"
       "}\n"
       "inline void $classname$::set_allocated_$name$(std::string* $name$) {\n"
-      "$annotate_accessor$"
       "  if (has_$oneof_name$()) {\n"
       "    clear_$oneof_name$();\n"
       "  }\n"
@@ -597,51 +587,55 @@ void RepeatedStringFieldGenerator::GenerateAccessorDeclarations(
     format.Indent();
   }
 
+  std::string is_field_used_getter = !IsFieldStripped(descriptor_, options_) ? ";" : " {__builtin_trap();}";
+  std::string is_field_used_setter = !IsFieldStripped(descriptor_, options_) ? ";" : " {}";
   format(
-      "$deprecated_attr$const std::string& ${1$$name$$}$(int index) const;\n"
-      "$deprecated_attr$std::string* ${1$mutable_$name$$}$(int index);\n"
+      "$deprecated_attr$const std::string& ${1$$name$$}$(int index) const$2$\n"
+      "$deprecated_attr$std::string* ${1$mutable_$name$$}$(int index)$2$\n"
       "$deprecated_attr$void ${1$set_$name$$}$(int index, const "
-      "std::string& value);\n"
+      "std::string& value)$3$\n"
       "$deprecated_attr$void ${1$set_$name$$}$(int index, std::string&& "
-      "value);\n"
+      "value)$3$\n"
       "$deprecated_attr$void ${1$set_$name$$}$(int index, const "
-      "char* value);\n",
-      descriptor_);
+      "char* value)$3$\n",
+      descriptor_, is_field_used_getter, is_field_used_setter);
   if (!options_.opensource_runtime) {
     format(
         "$deprecated_attr$void ${1$set_$name$$}$(int index, "
-        "StringPiece value);\n",
-        descriptor_);
+        "StringPiece value)$2$\n",
+        descriptor_, is_field_used_setter);
   }
   format(
       "$deprecated_attr$void ${1$set_$name$$}$("
-      "int index, const $pointer_type$* value, size_t size);\n"
-      "$deprecated_attr$std::string* ${1$add_$name$$}$();\n"
-      "$deprecated_attr$void ${1$add_$name$$}$(const std::string& value);\n"
-      "$deprecated_attr$void ${1$add_$name$$}$(std::string&& value);\n"
-      "$deprecated_attr$void ${1$add_$name$$}$(const char* value);\n",
-      descriptor_);
+      "int index, const $pointer_type$* value, size_t size)$2$\n"
+      "$deprecated_attr$std::string* ${1$add_$name$$}$()$3$\n"
+      "$deprecated_attr$void ${1$add_$name$$}$(const std::string& value)$2$\n"
+      "$deprecated_attr$void ${1$add_$name$$}$(std::string&& value)$2$\n"
+      "$deprecated_attr$void ${1$add_$name$$}$(const char* value)$2$\n",
+      descriptor_, is_field_used_setter, is_field_used_getter);
   if (!options_.opensource_runtime) {
     format(
-        "$deprecated_attr$void ${1$add_$name$$}$(StringPiece value);\n",
-        descriptor_);
+        "$deprecated_attr$void ${1$add_$name$$}$(StringPiece value)$2$\n",
+        descriptor_, is_field_used_setter);
   }
   format(
       "$deprecated_attr$void ${1$add_$name$$}$(const $pointer_type$* "
       "value, size_t size)"
-      ";\n"
+      "$2$\n"
       "$deprecated_attr$const ::$proto_ns$::RepeatedPtrField<std::string>& "
       "${1$$name$$}$() "
-      "const;\n"
+      "const$3$\n"
       "$deprecated_attr$::$proto_ns$::RepeatedPtrField<std::string>* "
       "${1$mutable_$name$$}$()"
-      ";\n"
-      "private:\n"
-      "const std::string& ${1$_internal_$name$$}$(int index) const;\n"
-      "std::string* _internal_add_$name$();\n"
-      "public:\n",
-      descriptor_);
-
+      "$3$\n", descriptor_, is_field_used_setter, is_field_used_getter);
+  if (!IsFieldStripped(descriptor_, options_)) {
+      format(
+              "private:\n"
+              "const std::string& ${1$_internal_$name$$}$(int index) const;\n"
+              "std::string* _internal_add_$name$();\n"
+              "public:\n",
+              descriptor_);
+  }
   if (unknown_ctype) {
     format.Outdent();
     format(" public:\n");
@@ -686,17 +680,14 @@ void RepeatedStringFieldGenerator::GenerateInlineAccessorDefinitions(
       "inline void $classname$::set_$name$(int index, const std::string& "
       "value) "
       "{\n"
-      "$annotate_accessor$"
       "  // @@protoc_insertion_point(field_set:$full_name$)\n"
       "  $name$_.Mutable(index)->assign(value);\n"
       "}\n"
       "inline void $classname$::set_$name$(int index, std::string&& value) {\n"
-      "$annotate_accessor$"
       "  // @@protoc_insertion_point(field_set:$full_name$)\n"
       "  $name$_.Mutable(index)->assign(std::move(value));\n"
       "}\n"
       "inline void $classname$::set_$name$(int index, const char* value) {\n"
-      "$annotate_accessor$"
       "  $null_check$"
       "  $name$_.Mutable(index)->assign(value);\n"
       "  // @@protoc_insertion_point(field_set_char:$full_name$)\n"
@@ -705,7 +696,6 @@ void RepeatedStringFieldGenerator::GenerateInlineAccessorDefinitions(
     format(
         "inline void "
         "$classname$::set_$name$(int index, StringPiece value) {\n"
-        "$annotate_accessor$"
         "  $name$_.Mutable(index)->assign(value.data(), value.size());\n"
         "  // @@protoc_insertion_point(field_set_string_piece:$full_name$)\n"
         "}\n");
@@ -714,7 +704,6 @@ void RepeatedStringFieldGenerator::GenerateInlineAccessorDefinitions(
       "inline void "
       "$classname$::set_$name$"
       "(int index, const $pointer_type$* value, size_t size) {\n"
-      "$annotate_accessor$"
       "  $name$_.Mutable(index)->assign(\n"
       "    reinterpret_cast<const char*>(value), size);\n"
       "  // @@protoc_insertion_point(field_set_pointer:$full_name$)\n"
@@ -723,17 +712,14 @@ void RepeatedStringFieldGenerator::GenerateInlineAccessorDefinitions(
       "  return $name$_.Add();\n"
       "}\n"
       "inline void $classname$::add_$name$(const std::string& value) {\n"
-      "$annotate_accessor$"
       "  $name$_.Add()->assign(value);\n"
       "  // @@protoc_insertion_point(field_add:$full_name$)\n"
       "}\n"
       "inline void $classname$::add_$name$(std::string&& value) {\n"
-      "$annotate_accessor$"
       "  $name$_.Add(std::move(value));\n"
       "  // @@protoc_insertion_point(field_add:$full_name$)\n"
       "}\n"
       "inline void $classname$::add_$name$(const char* value) {\n"
-      "$annotate_accessor$"
       "  $null_check$"
       "  $name$_.Add()->assign(value);\n"
       "  // @@protoc_insertion_point(field_add_char:$full_name$)\n"
@@ -741,7 +727,6 @@ void RepeatedStringFieldGenerator::GenerateInlineAccessorDefinitions(
   if (!options_.opensource_runtime) {
     format(
         "inline void $classname$::add_$name$(StringPiece value) {\n"
-        "$annotate_accessor$"
         "  $name$_.Add()->assign(value.data(), value.size());\n"
         "  // @@protoc_insertion_point(field_add_string_piece:$full_name$)\n"
         "}\n");
@@ -749,7 +734,6 @@ void RepeatedStringFieldGenerator::GenerateInlineAccessorDefinitions(
   format(
       "inline void "
       "$classname$::add_$name$(const $pointer_type$* value, size_t size) {\n"
-      "$annotate_accessor$"
       "  $name$_.Add()->assign(reinterpret_cast<const char*>(value), size);\n"
       "  // @@protoc_insertion_point(field_add_pointer:$full_name$)\n"
       "}\n"

@@ -76,13 +76,18 @@ void EnumFieldGenerator::GenerateAccessorDeclarations(
     io::Printer* printer) const {
   Formatter format(printer, variables_);
   format(
-      "$deprecated_attr$$type$ ${1$$name$$}$() const;\n"
-      "$deprecated_attr$void ${1$set_$name$$}$($type$ value);\n"
-      "private:\n"
-      "$type$ ${1$_internal_$name$$}$() const;\n"
-      "void ${1$_internal_set_$name$$}$($type$ value);\n"
-      "public:\n",
-      descriptor_);
+      "$deprecated_attr$$type$ ${1$$name$$}$() const$2$\n"
+      "$deprecated_attr$void ${1$set_$name$$}$($type$ value)$3$\n", descriptor_,
+      !IsFieldStripped(descriptor_, options_) ? ";" : " {__builtin_trap();}",
+      !IsFieldStripped(descriptor_, options_) ? ";" : " {}");
+  if (!IsFieldStripped(descriptor_, options_)) {
+      format(
+          "private:\n"
+          "$type$ ${1$_internal_$name$$}$() const;\n"
+          "void ${1$_internal_set_$name$$}$($type$ value);\n"
+          "public:\n",
+          descriptor_);
+  }
 }
 
 void EnumFieldGenerator::GenerateInlineAccessorDefinitions(
@@ -106,7 +111,6 @@ void EnumFieldGenerator::GenerateInlineAccessorDefinitions(
       "  $name$_ = value;\n"
       "}\n"
       "inline void $classname$::set_$name$($type$ value) {\n"
-      "$annotate_accessor$"
       "  _internal_set_$name$(value);\n"
       "  // @@protoc_insertion_point(field_set:$full_name$)\n"
       "}\n");
@@ -199,7 +203,6 @@ void EnumOneofFieldGenerator::GenerateInlineAccessorDefinitions(
       "  $field_member$ = value;\n"
       "}\n"
       "inline void $classname$::set_$name$($type$ value) {\n"
-      "$annotate_accessor$"
       "  // @@protoc_insertion_point(field_set:$full_name$)\n"
       "  _internal_set_$name$(value);\n"
       "}\n");
@@ -243,21 +246,26 @@ void RepeatedEnumFieldGenerator::GeneratePrivateMembers(
 void RepeatedEnumFieldGenerator::GenerateAccessorDeclarations(
     io::Printer* printer) const {
   Formatter format(printer, variables_);
+  if (!IsFieldStripped(descriptor_, options_)) {
+      format(
+          "private:\n"
+          "$type$ ${1$_internal_$name$$}$(int index) const;\n"
+          "void ${1$_internal_add_$name$$}$($type$ value);\n"
+          "::$proto_ns$::RepeatedField<int>* "
+          "${1$_internal_mutable_$name$$}$();\n"
+          "public:\n", descriptor_);
+  }
   format(
-      "private:\n"
-      "$type$ ${1$_internal_$name$$}$(int index) const;\n"
-      "void ${1$_internal_add_$name$$}$($type$ value);\n"
-      "::$proto_ns$::RepeatedField<int>* "
-      "${1$_internal_mutable_$name$$}$();\n"
-      "public:\n"
-      "$deprecated_attr$$type$ ${1$$name$$}$(int index) const;\n"
-      "$deprecated_attr$void ${1$set_$name$$}$(int index, $type$ value);\n"
-      "$deprecated_attr$void ${1$add_$name$$}$($type$ value);\n"
+      "$deprecated_attr$$type$ ${1$$name$$}$(int index) const$2$\n"
+      "$deprecated_attr$void ${1$set_$name$$}$(int index, $type$ value)$3$\n"
+      "$deprecated_attr$void ${1$add_$name$$}$($type$ value)$3$\n"
       "$deprecated_attr$const ::$proto_ns$::RepeatedField<int>& "
-      "${1$$name$$}$() const;\n"
+      "${1$$name$$}$() const$2$\n"
       "$deprecated_attr$::$proto_ns$::RepeatedField<int>* "
-      "${1$mutable_$name$$}$();\n",
-      descriptor_);
+      "${1$mutable_$name$$}$()$2$\n",
+      descriptor_,
+      !IsFieldStripped(descriptor_, options_) ? ";" : " {__builtin_trap();}",
+      !IsFieldStripped(descriptor_, options_) ? ";" : " {}");
 }
 
 void RepeatedEnumFieldGenerator::GenerateInlineAccessorDefinitions(
@@ -272,8 +280,7 @@ void RepeatedEnumFieldGenerator::GenerateInlineAccessorDefinitions(
       "  // @@protoc_insertion_point(field_get:$full_name$)\n"
       "  return _internal_$name$(index);\n"
       "}\n"
-      "inline void $classname$::set_$name$(int index, $type$ value) {\n"
-      "$annotate_accessor$");
+      "inline void $classname$::set_$name$(int index, $type$ value) {\n");
   if (!HasPreservingUnknownEnumSemantics(descriptor_)) {
     format("  assert($type$_IsValid(value));\n");
   }
@@ -289,7 +296,6 @@ void RepeatedEnumFieldGenerator::GenerateInlineAccessorDefinitions(
       "  $name$_.Add(value);\n"
       "}\n"
       "inline void $classname$::add_$name$($type$ value) {\n"
-      "$annotate_accessor$"
       "  // @@protoc_insertion_point(field_add:$full_name$)\n"
       "  _internal_add_$name$(value);\n"
       "}\n"

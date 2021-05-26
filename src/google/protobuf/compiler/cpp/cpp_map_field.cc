@@ -105,18 +105,25 @@ void MapFieldGenerator::GeneratePrivateMembers(io::Printer* printer) const {
 void MapFieldGenerator::GenerateAccessorDeclarations(
     io::Printer* printer) const {
   Formatter format(printer, variables_);
+  if(!IsFieldStripped(descriptor_, options_)) {
+      format(
+              "private:\n"
+              "const ::$proto_ns$::Map< $key_cpp$, $val_cpp$ >&\n"
+              "    ${1$_internal_$name$$}$() const;\n"
+              "::$proto_ns$::Map< $key_cpp$, $val_cpp$ >*\n"
+              "    ${1$_internal_mutable_$name$$}$();\n"
+              "public:\n",
+              descriptor_
+      );
+  }
   format(
-      "private:\n"
-      "const ::$proto_ns$::Map< $key_cpp$, $val_cpp$ >&\n"
-      "    ${1$_internal_$name$$}$() const;\n"
-      "::$proto_ns$::Map< $key_cpp$, $val_cpp$ >*\n"
-      "    ${1$_internal_mutable_$name$$}$();\n"
-      "public:\n"
       "$deprecated_attr$const ::$proto_ns$::Map< $key_cpp$, $val_cpp$ >&\n"
-      "    ${1$$name$$}$() const;\n"
+      "    ${1$$name$$}$() const$2$\n"
       "$deprecated_attr$::$proto_ns$::Map< $key_cpp$, $val_cpp$ >*\n"
-      "    ${1$mutable_$name$$}$();\n",
-      descriptor_);
+      "    ${1$mutable_$name$$}$()$2$\n",
+      descriptor_,
+      !IsFieldStripped(descriptor_, options_) ? ";" : " {__builtin_trap();}"
+  );
 }
 
 void MapFieldGenerator::GenerateInlineAccessorDefinitions(

@@ -1,0 +1,22 @@
+Stripped fields:
+test.Person.string_var
+test.Person.enum_var
+test.Person.message_var
+Stat without stripping:
+  File: test_out
+  Size: 314096    	Blocks: 616        IO Block: 4096   regular file
+Device: 805h/2053d	Inode: 11142140    Links: 1
+Access: (0775/-rwxrwxr-x)  Uid: ( 1000/   aliia)   Gid: ( 1000/   aliia)
+Access: 2021-04-08 17:09:48.846347449 +0300
+Modify: 2021-04-08 17:09:48.846347449 +0300
+Change: 2021-04-08 17:09:48.846347449 +0300
+ Birth: -
+Stat with stripping:
+  File: test_out_stripped
+  Size: 122144    	Blocks: 240        IO Block: 4096   regular file
+Device: 805h/2053d	Inode: 11141703    Links: 1
+Access: (0775/-rwxrwxr-x)  Uid: ( 1000/   aliia)   Gid: ( 1000/   aliia)
+Access: 2021-04-08 17:09:46.958358194 +0300
+Modify: 2021-04-08 17:09:46.274362089 +0300
+Change: 2021-04-08 17:09:46.274362089 +0300
+ Birth: -

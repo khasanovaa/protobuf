@@ -34,11 +34,29 @@
 #define GOOGLE_PROTOBUF_COMPILER_CPP_OPTIONS_H__
 
 #include <string>
+#include <memory>
+#include <unordered_set>
+#include <fstream>
+#include <google/protobuf/descriptor.pb.h>
 
 namespace google {
 namespace protobuf {
 namespace compiler {
-class AccessInfoMap;
+class AccessInfoMap {
+public:
+    AccessInfoMap(const std::string& filename) {
+        std::ifstream istrm(filename);
+        std::string s;
+        while (istrm >> s) {
+            accessed.insert(s);
+        }
+    }
+    bool IsAccessed(const FieldDescriptor* field) {
+        return accessed.find(field->full_name()) != accessed.end();
+    }
+private:
+    std::unordered_set<std::string> accessed;
+};
 
 namespace cpp {
 
@@ -68,7 +86,7 @@ struct Options {
   int num_cc_files = 0;
   std::string annotation_pragma_name;
   std::string annotation_guard_name;
-  const AccessInfoMap* access_info_map = nullptr;
+  std::shared_ptr<AccessInfoMap> access_info_map;
 };
 
 }  // namespace cpp

@@ -1,0 +1,30 @@
+syntax = "proto3";
+package test;
+
+enum SimpleEnum {
+  BAR_VALUE = 0;
+  OTHER_VALUE = 1;
+}
+
+message Person {
+  optional string string_var = 1;
+  optional int32 int_var = 2;
+  map<string, Person> map_var = 3;
+  SimpleEnum enum_var = 4;
+
+  message Nested {
+    repeated int32 repeated_int_var = 1;
+    repeated string repeated_string_var = 2;
+    repeated SimpleEnum repeated_enum_var = 3;
+  }
+
+  Nested message_var = 5;
+  repeated Nested repeated_message_var = 6;
+
+  oneof oneof_var {
+    int32 oneof_int_var = 7;
+    string oneof_string_var = 8;
+    SimpleEnum oneof_enum_var = 10;
+    Nested oneof_message_var = 11;
+  }
+}
